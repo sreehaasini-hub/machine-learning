@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% from "_macros.html" import kpi, means %}
+{% block content %}
+<div class="kpis">
+{{ kpi('Dimensions', '{:,}'.format(q.shape[0]) ~ ' × ' ~ q.shape[1], 'rows × columns') }}
+{{ kpi('Missing Values', q.missing_total) }}{{ kpi('Duplicate Records', q.duplicates) }}
+{{ kpi('Complete Records', '{:,}'.format(q.complete)) }}{{ kpi('Numerical Features', q.n_num) }}{{ kpi('Categorical Features', q.n_cat) }}
+{{ kpi('Unique Crops', s.crops) }}{{ kpi('Unique States', s.states) }}{{ kpi('Unique Seasons', s.seasons) }}{{ kpi('Year Range', s.year_min ~ '–' ~ s.year_max) }}
+</div>
+<div class="card">
+<p class="status {{ 'ok' if q.missing_total == 0 else 'warn' }}">{{ '✔ No missing values detected.' if q.missing_total == 0 else '⚠ ' ~ q.missing_total ~ ' missing values detected.' }}
+ &nbsp; {{ '✔ No duplicate rows detected.' if q.duplicates == 0 else '⚠ ' ~ q.duplicates ~ ' duplicate rows found.' }}</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Kind</th><th>Missing</th><th>Unique</th></tr></thead><tbody>
+{% for r in q.rows %}<tr><td><code>{{ r.column }}</code></td><td>{{ r.dtype }}</td><td>{{ r.kind }}</td><td>{{ r.missing }}</td><td>{{ '{:,}'.format(r.unique) }}</td></tr>{% endfor %}
+</tbody></table></div></div>
+<div class="card"><h3>Notes from inspection</h3><ul>
+<li>Seasons found: {{ q.seasons|join(', ') }}.</li>
+<li>Text columns (<code>Crop</code>, <code>Season</code>) contained trailing spaces in the raw CSV; they are trimmed on load.</li>
+<li>{{ q.zero_yield }} records have Yield = 0 (and {{ q.zero_prod }} have Production = 0); they are kept as real observations.</li></ul></div>
+{{ means('Data quality', 'Checking missing values and duplicates before modelling prevents biased or unreliable results.') }}
+{% endblock %}

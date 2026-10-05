@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% from "_macros.html" import kpi, means %}
+{% block content %}
+<h3>Key Findings</h3>
+<div class="card insights"><ul>
+<li>Highest average rainfall state: <b>{{ f.rain_hi[0] }}</b> ({{ f.rain_hi[1]|num(1) }} mm).</li>
+<li>Lowest average rainfall state: <b>{{ f.rain_lo[0] }}</b> ({{ f.rain_lo[1]|num(1) }} mm).</li>
+<li>Highest average yield crop: <b>{{ f.yield_crop[0] }}</b> ({{ f.yield_crop[1]|num(1) }}) — likely affected by differing units across crops.</li>
+<li>Highest total production crop: <b>{{ f.prod_crop[0] }}</b> ({{ f.prod_crop[1]|num(0) }}).</li>
+<li>Strongest Pearson correlation with Yield: <b>{{ f.corr[0] }}</b> (r = {{ '%.3f'|format(f.corr[1]) }}).</li>
+<li>Year with highest average yield: <b>{{ f.year_yield[0] }}</b> ({{ f.year_yield[1]|num(1) }}).</li>
+<li>Year with highest average rainfall: <b>{{ f.year_rain[0] }}</b> ({{ f.year_rain[1]|num(1) }} mm).</li></ul></div>
+<h3>Machine Learning Findings</h3>
+<div class="kpis">{{ kpi('MAE', m.mae|num(3)) }}{{ kpi('RMSE', m.rmse|num(3)) }}{{ kpi('R²', m.r2|num(4)) }}</div>
+<div class="card"><p>Most important features: {% for n, v in top %}{{ n }} ({{ '%.1f'|format(v*100) }}%){{ ', ' if not loop.last }}{% endfor %}. With Production removed from the inputs, R² is {{ mnp.r2|num(4) }} and MAE {{ mnp.mae|num(3) }}, so the high score is partly because Production and Area together define Yield.</p></div>
+<h3>Agricultural Insights</h3>
+<div class="card"><ul>
+<li>Across all {{ '{:,}'.format(s.records) }} records, the Pearson correlation between rainfall and yield is {{ '%.3f'|format(f.rain_corr) }}, so rainfall alone explains little of yield when all crops are pooled.</li>
+<li>Crop type is the dominant driver of yield level in the model; rainfall, state and inputs refine the estimate.</li>
+<li>Rainfall effects are likely crop- and region-specific, which a pooled coefficient cannot show; the Time Analysis filters help explore this.</li></ul></div>
+<h3>Final Conclusion</h3>
+<div class="card"><p>AGRIRAIN AI turns {{ s.year_min }}–{{ s.year_max }} historical records into an analysis and forecasting workflow. It can support:</p><ul>
+<li><b>Agricultural planning</b> — understanding rainfall and yield patterns by state and season.</li>
+<li><b>Crop selection</b> — comparing historical yields of crops in a region.</li>
+<li><b>Yield estimation</b> — quick model-based estimates for chosen conditions.</li>
+<li><b>Data-driven decision making</b> — grounding discussions in observed data.</li></ul>
+<p class="muted">Limitations: the model learns historical patterns only and does not guarantee agricultural outcomes. It does not model weather forecasts, soil, pests or policy, and its metrics are influenced by Production leakage and outliers.</p></div>
+{% endblock %}

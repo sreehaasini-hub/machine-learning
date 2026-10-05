@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% from "_macros.html" import chart, means %}
+{% block content %}
+<div class="card filters">
+<label>State<select id="f-state"><option value="">All states</option>{% for x in states %}<option>{{ x }}</option>{% endfor %}</select></label>
+<label>Crop<select id="f-crop"><option value="">All crops</option>{% for x in crops %}<option>{{ x }}</option>{% endfor %}</select></label>
+<label>Season<select id="f-season"><option value="">All seasons</option>{% for x in seasons %}<option>{{ x }}</option>{% endfor %}</select></label>
+<button class="btn ghost" id="f-reset" type="button">Reset</button></div>
+<div class="card insights"><h3>Trend summary</h3><ul id="trend-notes">{% for n in notes %}<li>{{ n }}</li>{% endfor %}</ul></div>
+{{ chart('rain') }}{{ chart('yield') }}{{ chart('prod') }}
+<div class="grid2">{{ chart('activity') }}{{ chart('season') }}</div>
+{{ means('Trend line', 'The slope comes from a straight-line fit through the yearly averages. A positive slope means the average rises over time.') }}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/time.js') }}"></script>{% endblock %}

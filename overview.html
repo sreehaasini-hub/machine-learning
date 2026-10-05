@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% from "_macros.html" import kpi, chart, means %}
+{% block content %}
+<section class="hero"><div class="eyebrow light">AGRIRAIN AI</div>
+<h2>Rainfall-Based Crop Yield Forecasting Using Gradient Boosting</h2>
+<p>A historical agricultural analysis and forecasting system. It studies rainfall, fertilizer, pesticide, cultivated area and crop information for {{ s.states }} Indian states ({{ s.year_min }}–{{ s.year_max }}), explores how they relate to crop yield, and trains a Gradient Boosting regression model to predict yield.</p>
+<div class="chips"><span>Dataset: crop_yield.csv</span><span>Period: {{ s.year_min }}–{{ s.year_max }}</span><span>Records: {{ '{:,}'.format(s.records) }}</span></div></section>
+<div class="kpis">
+{{ kpi('Total Records', '{:,}'.format(s.records)) }}{{ kpi('States', s.states) }}{{ kpi('Crops', s.crops) }}{{ kpi('Seasons', s.seasons) }}
+{{ kpi('Year Range', s.year_min ~ '–' ~ s.year_max) }}{{ kpi('Avg Annual Rainfall', (s.avg_rain|num(1)) ~ ' mm') }}{{ kpi('Avg Yield', s.avg_yield|num(2), 'median ' ~ (s.median_yield|num(2))) }}
+</div>
+<h3>Project Pipeline</h3>
+<div class="pipeline">{% for st in ['Data Collection','Data Cleaning','Exploratory Analysis','Correlation Analysis','Gradient Boosting','Model Evaluation','Yield Forecast'] %}<div class="step"><b>{{ loop.index }}</b>{{ st }}</div>{% endfor %}</div>
+<div class="grid2">{{ chart('c1') }}{{ chart('c2') }}</div>
+{{ means('Project goal', 'We use historical data to understand how rainfall and other factors relate to crop yield, then use a machine-learning model to estimate yield for chosen conditions.') }}
+{% endblock %}

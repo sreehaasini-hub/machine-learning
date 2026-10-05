@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ page[1] if page else 'AGRIRAIN AI' }}{% endblock %} · AGRIRAIN AI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head><body>
+<button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">☰</button>
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="brand-name">🌾 AGRIRAIN AI</div><div class="brand-tag">Rainfall &amp; Crop Intelligence</div></div>
+  <nav>
+  {% for ep, name, desc in pages %}
+    <a href="{{ url_for(ep) }}" class="{{ 'active' if ep == active }}"><span class="nn">{{ '%02d' % loop.index }}</span>{{ name }}</a>
+  {% endfor %}
+  </nav>
+  <div class="side-foot">crop_yield.csv · B.Tech CSE Project</div>
+</aside>
+<main class="main">
+  {% if page %}
+  <header class="page-head">
+    <div class="eyebrow">PAGE {{ '%02d' % page_no }} / 08</div>
+    <h1>{{ page[1] }}</h1><p>{{ page[2] }}</p>
+  </header>
+  {% endif %}
+  {% block content %}{% endblock %}
+  {% if page %}
+  <div class="pager">
+    {% if prev_page %}<a class="btn ghost" href="{{ url_for(prev_page[0]) }}">← {{ prev_page[1] }}</a>{% else %}<span></span>{% endif %}
+    {% if next_page %}<a class="btn" href="{{ url_for(next_page[0]) }}">Next: {{ next_page[1] }} →</a>{% endif %}
+  </div>
+  {% endif %}
+</main>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script id="chart-data" type="application/json">{{ charts|tojson }}</script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body></html>

@@ -1,0 +1,9 @@
+{% macro kpi(label, value, sub='') %}
+<div class="kpi"><div class="kpi-label">{{ label }}</div><div class="kpi-value">{{ value }}</div>{% if sub %}<div class="kpi-sub">{{ sub }}</div>{% endif %}</div>
+{% endmacro %}
+{% macro chart(key, note='', h=380) %}
+<div class="card"><div class="chart" data-chart="{{ key }}" style="height:{{ h }}px"></div>{% if note %}<p class="interp">💡 {{ note }}</p>{% endif %}</div>
+{% endmacro %}
+{% macro means(title, text) %}
+<div class="means"><strong>What this means — {{ title }}</strong><p>{{ text }}</p></div>
+{% endmacro %}

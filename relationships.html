@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% from "_macros.html" import chart, means %}
+{% block content %}
+{{ chart('heat', '', 480) }}
+<div class="card insights"><h3>Insights</h3><ul>{% for i in insights %}<li>{{ i }}</li>{% endfor %}</ul></div>
+<div class="card"><h3>Correlation with Yield</h3><div class="table-wrap"><table><thead><tr><th>Variable</th><th>Pearson r</th><th>Spearman ρ</th></tr></thead><tbody>
+{% for r in rows %}<tr><td><code>{{ r.var }}</code></td><td>{{ '%.3f'|format(r.pearson) }}</td><td>{{ '%.3f'|format(r.spearman) }}</td></tr>{% endfor %}</tbody></table></div></div>
+<p class="muted">Scatter plots show a random sample of {{ '{:,}'.format(sample_n) }} records (seed 42); coefficients use all records. Log axes are used except for rainfall.</p>
+<div class="grid2">{% for v in ['Annual_Rainfall','Area','Fertilizer','Pesticide','Production'] %}{{ chart(v) }}{% endfor %}</div>
+{{ means('Correlation', 'Correlation measures the strength and direction of the linear relationship between numerical variables (−1 to +1). Spearman measures rank-based (monotonic) relationships.') }}
+{% endblock %}

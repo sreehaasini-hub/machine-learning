@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% from "_macros.html" import chart, means %}
+{% block content %}
+<div class="grid2">{{ chart('crop_dist', notes.crop, 460) }}{{ chart('state_dist', notes.state, 460) }}</div>
+<div class="grid2">{{ chart('season_dist', notes.season) }}{{ chart('rain_hist', notes.rain) }}</div>
+{{ chart('yield_hist', notes.yield) }}
+<div class="grid2">{{ chart('crop_yield', notes.crop_yield, 460) }}{{ chart('state_yield', notes.state_yield, 520) }}</div>
+<div class="grid2">{{ chart('crop_prod', notes.prod, 460) }}{{ chart('state_rain', notes.srain, 520) }}</div>
+{{ means('Skewed data', 'When the mean is far above the median, a few very large values dominate. This is why log scales and rank-based statistics are used on later pages.') }}
+{% endblock %}

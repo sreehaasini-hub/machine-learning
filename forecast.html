@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% from "_macros.html" import means %}
+{% block content %}
+<div class="card"><h3>Yield Forecast Simulator</h3>
+{% if errors %}<div class="alert">{% for e in errors %}<div>⚠ {{ e }}</div>{% endfor %}</div>{% endif %}
+<form method="post" action="{{ url_for('forecast') }}" class="form-grid">
+<label>State<select name="state">{% for x in states %}<option {{ 'selected' if x == vals.state }}>{{ x }}</option>{% endfor %}</select></label>
+<label>Crop<select name="crop">{% for x in crops %}<option {{ 'selected' if x == vals.crop }}>{{ x }}</option>{% endfor %}</select></label>
+<label>Season<select name="season">{% for x in seasons %}<option {{ 'selected' if x == vals.season }}>{{ x }}</option>{% endfor %}</select></label>
+<label>Crop Year ({{ ymin }}–{{ ymax }})<input type="number" name="year" min="{{ ymin }}" max="{{ ymax }}" step="1" value="{{ vals.year }}" required></label>
+<label>Area (hectares)<input type="number" name="area" min="0.01" step="any" value="{{ vals.area }}" required></label>
+<label>Production<input type="number" name="production" min="0" step="any" value="{{ vals.production }}" required></label>
+<label>Annual Rainfall (mm)<input type="number" name="rain" min="0" step="any" value="{{ vals.rain }}" required></label>
+<label>Fertilizer<input type="number" name="fert" min="0" step="any" value="{{ vals.fert }}" required></label>
+<label>Pesticide<input type="number" name="pest" min="0" step="any" value="{{ vals.pest }}" required></label>
+<div class="form-actions"><button class="btn" type="submit">Predict Crop Yield</button><a class="btn ghost" href="{{ url_for('forecast') }}">Reset</a></div>
+</form>
+<p class="muted">Defaults are the dataset medians. Year is limited to the dataset period because tree models cannot extrapolate beyond training data.</p></div>
+{% if result %}
+<div class="result"><div class="eyebrow light">Predicted Yield</div><div class="big">{{ result.pred|num(3) }}</div>
+<div class="muted-l">Gradient Boosting Regressor · test-set MAE {{ m.mae|num(2) }}</div></div>
+<div class="kpis">
+<div class="kpi"><div class="kpi-label">Selected State</div><div class="kpi-value sm">{{ result.row.State }}</div></div>
+<div class="kpi"><div class="kpi-label">Selected Crop</div><div class="kpi-value sm">{{ result.row.Crop }}</div></div>
+<div class="kpi"><div class="kpi-label">Selected Season</div><div class="kpi-value sm">{{ result.row.Season }}</div></div>
+<div class="kpi"><div class="kpi-label">Rainfall</div><div class="kpi-value sm">{{ result.row.Annual_Rainfall|num(1) }} mm</div></div>
+<div class="kpi"><div class="kpi-label">Predicted Yield</div><div class="kpi-value sm">{{ result.pred|num(3) }}</div></div></div>
+<div class="card"><h3>Context from the dataset</h3><ul>
+<li>Historical median yield for {{ result.row.Crop }} (all states): {{ result.crop_median|num(3) }}.</li>
+{% if result.pair_median is not none %}<li>Historical median for {{ result.row.Crop }} in {{ result.row.State }}: {{ result.pair_median|num(3) }} ({{ result.pair_n }} records).</li>{% else %}<li>No records of {{ result.row.Crop }} in {{ result.row.State }} exist in the dataset, so this prediction is less reliable.</li>{% endif %}
+{% if result.raw < 0 %}<li>The raw model output was negative ({{ result.raw|num(3) }}); it is shown as 0 because yield cannot be negative.</li>{% endif %}</ul></div>
+{% endif %}
+{{ means('Forecast', 'The simulator feeds your inputs to the same trained model used on the Gradient Boosting page. It is a statistical estimate from historical patterns, not a guarantee of actual outcomes.') }}
+{% endblock %}

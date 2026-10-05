@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% from "_macros.html" import kpi, chart, means %}
+{% block content %}
+<div class="card"><h3>Model Setup</h3><div class="table-wrap"><table><tbody>
+<tr><td>Model</td><td>Gradient Boosting Regressor (scikit-learn)</td></tr><tr><td>Target</td><td>Crop Yield</td></tr>
+<tr><td>Training samples</td><td>{{ '{:,}'.format(a.n_train) }}</td></tr><tr><td>Testing samples</td><td>{{ '{:,}'.format(a.n_test) }} ({{ (test_size*100)|int }}% hold-out, random_state={{ rs }})</td></tr>
+<tr><td>Features ({{ feats|length }})</td><td>{{ feats|join(', ') }}</td></tr><tr><td>Encoding</td><td>One-hot for Crop, Season, State; numeric features passed through</td></tr>
+<tr><td>Hyperparameters</td><td>{% for k, v in params.items() %}{{ k }}={{ v }}{{ ', ' if not loop.last }}{% endfor %}</td></tr></tbody></table></div></div>
+{{ means('Gradient Boosting', 'Gradient Boosting combines multiple weak decision-tree learners sequentially. Each new tree focuses on reducing the errors made by the previous trees.') }}
+<h3>Model Evaluation Matrix</h3>
+<div class="kpis">{{ kpi('MAE', a.metrics.mae|num(3), 'mean absolute error') }}{{ kpi('MSE', a.metrics.mse|num(2), 'mean squared error') }}{{ kpi('RMSE', a.metrics.rmse|num(3), 'root MSE') }}{{ kpi('R² Score', a.metrics.r2|num(4), 'variance explained') }}</div>
+<div class="grid3"><div class="means"><strong>MAE</strong><p>The average absolute difference between actual and predicted yield.</p></div><div class="means"><strong>RMSE</strong><p>Prediction error that gives greater weight to larger errors.</p></div><div class="means"><strong>R²</strong><p>The proportion of variance in crop yield explained by the model.</p></div></div>
+<div class="card warnbox"><h3>⚠ Read these scores carefully</h3><ul>
+<li><b>Production leakage:</b> Yield is Production ÷ Area, so including both as inputs makes the task easier than real forecasting.</li>
+<li><b>Check with Production removed</b> (same model, same split): MAE {{ a.metrics_no_prod.mae|num(3) }}, RMSE {{ a.metrics_no_prod.rmse|num(3) }}, R² {{ a.metrics_no_prod.r2|num(4) }}.</li>
+<li><b>Outliers dominate R²:</b> a few crops with very large yield values (e.g. coconut) heavily influence MSE/RMSE/R². MAE is the more representative error here.</li></ul></div>
+<div class="grid2">{{ chart('avp') }}{{ chart('resid') }}</div>
+<h3>Feature Importance</h3>
+<div class="grid2">{{ chart('imp', '', 360) }}{{ chart('imp_d', '', 420) }}</div>
+<div class="card insights"><p>{{ top[0] }} accounts for {{ '%.1f'|format(top[1]*100) }}% of total importance, the largest share of any feature{% if a.imp_agg|length > 2 %}; next are {{ a.imp_agg[1][0] }} ({{ '%.1f'|format(a.imp_agg[1][1]*100) }}%) and {{ a.imp_agg[2][0] }} ({{ '%.1f'|format(a.imp_agg[2][1]*100) }}%){% endif %}. Importance measures how much a feature reduced error inside the trees; it is not a causal effect.</p></div>
+<h3>Supplementary Yield-Class Classification</h3>
+<div class="card"><p><b>The primary model is a regression model. The confusion matrix is included as a supplementary classification analysis by converting continuous yield into Low/Medium/High categories.</b> It does not evaluate the regression model.</p>
+<p class="muted">Thresholds are data-driven tertiles of Yield: Low ≤ {{ a.cls.q1|num(3) }} &lt; Medium ≤ {{ a.cls.q2|num(3) }} &lt; High. A separate Gradient Boosting Classifier was trained (stratified {{ (test_size*100)|int }}% test split, {{ '{:,}'.format(a.cls.n_test) }} samples; precision/recall/F1 are macro-averaged).</p></div>
+<div class="kpis">{{ kpi('Accuracy', '%.3f'|format(a.cls.accuracy)) }}{{ kpi('Precision', '%.3f'|format(a.cls.precision)) }}{{ kpi('Recall', '%.3f'|format(a.cls.recall)) }}{{ kpi('F1 Score', '%.3f'|format(a.cls.f1)) }}</div>
+{{ chart('cm', '', 380) }}
+{% endblock %}
